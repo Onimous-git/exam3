@@ -5,17 +5,19 @@ import Groq from "groq-sdk";
 
 dotenv.config();
 
+
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-app.get("/", (req, res) => {
-  res.send("Backend running");
-});
+
 
 app.post("/generate-quiz", async (req, res) => {
   const { topic, numQuestions } = req.body;
@@ -65,6 +67,13 @@ Do not include any extra text outside the JSON.`
     console.error(err);
     res.status(500).send("Error generating quiz");
   }
+});
+
+const path = require("path");
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.listen(5000, () => {
