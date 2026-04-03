@@ -74,9 +74,11 @@ Do not include any extra text outside the JSON.`
   }
 });
 
-// Catch-all route (must be AFTER API routes)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/index.html"));
+const path = require("path");
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Use dynamic port (VERY IMPORTANT for Render)
