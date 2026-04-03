@@ -194,7 +194,7 @@ label {
         const numQuestions =
           parseInt(document.getElementById("numQuestions").value) || 10;
 
-        const res = await fetch("http://localhost:5000/generate-quiz", {
+        const res = await fetch("generate-quiz", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ topic, numQuestions }),
