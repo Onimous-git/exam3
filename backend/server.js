@@ -2,23 +2,28 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Groq from "groq-sdk";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
-
-
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Fix __dirname (ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// Serve frontend (IMPORTANT: public is outside backend)
+app.use(express.static(path.join(__dirname, "../public")));
 
+// Groq client
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-
-
+// API route
 app.post("/generate-quiz", async (req, res) => {
   const { topic, numQuestions } = req.body;
 
@@ -53,8 +58,8 @@ Do not include any extra text outside the JSON.`
     let quiz;
     try {
       const text = completion.choices[0].message.content;
-      const jsonStart = text.indexOf('[');
-      const jsonEnd = text.lastIndexOf(']') + 1;
+      const jsonStart = text.indexOf("[");
+      const jsonEnd = text.lastIndexOf("]") + 1;
       const jsonString = text.slice(jsonStart, jsonEnd);
       quiz = JSON.parse(jsonString);
     } catch (err) {
@@ -69,13 +74,14 @@ Do not include any extra text outside the JSON.`
   }
 });
 
-const path = require("path");
-app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+// Catch-all route (must be AFTER API routes)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+// Use dynamic port (VERY IMPORTANT for Render)
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
